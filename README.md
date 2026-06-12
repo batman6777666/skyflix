@@ -1,3 +1,12 @@
+---
+title: Skyflix
+emoji: 🎬
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # 🎬 Skyflix — Modern Movie & TV Streaming Platform
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
