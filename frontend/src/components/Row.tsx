@@ -1,0 +1,130 @@
+import { useRef } from "react";
+import { ChevronLeft, ChevronRight, Star, Play } from "lucide-react";
+
+interface RowProps {
+  title: string;
+  data: any[];
+  isVertical?: boolean; 
+  isNumbered?: boolean; 
+  onMovieClick: (movie: any) => void;
+}
+
+export default function Row({ title, data, isNumbered = false, onMovieClick }: RowProps) {
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const slide = (offset: number) => {
+    if (rowRef.current) {
+      rowRef.current.scrollBy({ left: offset, behavior: "smooth" });
+    }
+  };
+
+  if (!data || data.length === 0) return null;
+
+  return (
+    <div className="space-y-3 px-3 md:px-6 group mb-8">
+      <h2 className="text-lg md:text-2xl font-bold text-white hover:text-blue-400 cursor-pointer transition-colors w-full flex items-center gap-2">
+        {title}
+        <span className="text-[10px] font-normal text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0 duration-300">Explore All</span>
+      </h2>
+
+      <div className="relative group/slider">
+        
+        <button 
+          onClick={() => slide(-800)}
+          className="hidden md:block absolute left-0 top-[35%] z-40 p-3 bg-black/60 text-white rounded-full opacity-0 group-hover/slider:opacity-100 hover:bg-white hover:text-black transition-all disabled:opacity-0 -translate-x-4"
+        >
+          <ChevronLeft size={24} />
+        </button>
+
+        <div 
+          ref={rowRef}
+          className="flex gap-2 md:gap-4 overflow-x-auto scrollbar-hide pb-4 px-1"
+          style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {data.map((item, index) => {
+            const rating = item.vote_average ? item.vote_average.toFixed(1) : "N/A";
+            
+            // ✅ FIX 1: Prioritize Episode Poster (Continue Watching) -> Season Poster -> Main Poster
+            const displayImage = item.episodePoster || item.poster_path;
+
+            // ✅ FIX 2: Check for a custom subtitle (S1 E4: The Body) or fallback to Year
+            const displaySubtitle = item.displaySubtitle || 
+                                    (item.release_date ? item.release_date.split("-")[0] : 
+                                    item.first_air_date ? item.first_air_date.split("-")[0] : "2024");
+
+            return (
+                <div
+                  key={item._id || item.id || index}
+                  onClick={() => onMovieClick(item)}
+                  style={{ scrollSnapAlign: 'start' }}
+                  className={`relative flex-none cursor-pointer transition-all duration-300 hover:scale-105 hover:z-10 group/card ${
+                    isNumbered ? "w-[115px] md:w-[240px]" : "w-[115px] sm:w-[145px] md:w-[180px]"
+                  }`}
+              >
+
+                <div className="relative rounded-lg overflow-hidden aspect-[2/3] shadow-lg shadow-black/50 border border-white/5">
+                  <img 
+                    src={displayImage} 
+                    alt={item.title || item.name} 
+                    className="w-full h-full object-cover transition-opacity duration-300 group-hover/card:opacity-80"
+                    loading="lazy"
+                  />
+                  
+                  {/* Progress Bar (Optional Visual Touch for Continue Watching) */}
+                  {item.progress > 0 && (
+                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                        <div 
+                          className="h-full bg-red-600" 
+                          style={{ width: `${(item.progress / item.duration) * 100}%` }} 
+                        />
+                     </div>
+                  )}
+
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full border border-white/50">
+                      <Play fill="white" className="text-white" size={24} />
+                    </div>
+                  </div>
+
+                  {isNumbered && (
+                    <span className="absolute -left-4 -bottom-8 text-[80px] md:text-[100px] font-black text-black text-stroke-white leading-none z-20 drop-shadow-lg">
+                      {index + 1}
+                    </span>
+                  )}
+                </div>
+
+                {!isNumbered && (
+                  <div className="mt-2 px-1">
+                    <h3 className="text-white font-semibold text-xs md:text-base truncate" title={item.title || item.name}>
+                      {item.title || item.name}
+                    </h3>
+                    
+                    <div className="flex items-center justify-between mt-1">
+                      {/* ✅ FIX 3: Display the Episode info (S1 E4) instead of just the Year */}
+                      <span className={`text-[10px] md:text-xs truncate max-w-[70%] ${item.displaySubtitle ? "text-blue-400 font-medium" : "text-gray-400"}`}>
+                        {displaySubtitle}
+                      </span>
+
+                      <div className="flex items-center gap-1 bg-[#16181f] border border-white/10 px-1.5 py-0.5 rounded text-[9px] md:text-[10px] text-yellow-400 font-bold">
+                        <Star size={8} fill="currentColor" />
+                        <span>{rating}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <button 
+          onClick={() => slide(800)}
+          className="hidden md:block absolute right-0 top-[35%] z-40 p-3 bg-black/60 text-white rounded-full opacity-0 group-hover/slider:opacity-100 hover:bg-white hover:text-black transition-all translate-x-4"
+        >
+          <ChevronRight size={24} />
+        </button>
+
+      </div>
+    </div>
+  );
+}

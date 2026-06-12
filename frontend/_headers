@@ -1,0 +1,20 @@
+/* 1. SPA fallback — all routes serve index.html */
+/* 2. Cache static assets aggressively */
+/* 3. Security headers */
+
+/assets/*      res.setHeader Cache-Control public, immutable, max-age=31536000
+*.js            res.setHeader Cache-Control public, immutable, max-age=31536000
+*.css           res.setHeader Cache-Control public, immutable, max-age=31536000
+*.png           res.setHeader Cache-Control public, immutable, max-age=31536000
+*.jpg           res.setHeader Cache-Control public, immutable, max-age=31536000
+*.svg           res.setHeader Cache-Control public, immutable, max-age=31536000
+*.woff2         res.setHeader Cache-Control public, immutable, max-age=31536000
+*.json          res.setHeader Cache-Control public, max-age=86400
+
+/               res.setHeader Cache-Control public, max-age=0, must-revalidate
+/*              res.setHeader Cache-Control public, max-age=0, must-revalidate
+/*              res.setHeader X-Content-Type-Options nosniff
+/*              res.setHeader X-Frame-Options DENY
+/*              res.setHeader Referrer-Policy strict-origin-when-cross-origin
+
+/*              redirect 301  https://skyflix.app
